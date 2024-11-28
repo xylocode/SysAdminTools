@@ -17,6 +17,7 @@ namespace XyloCode.SysAdminTools.MikroTik
 
             var nc = new NetworkCredential(mtUser, mtPass);
             ftpClient = new FtpClient(host, nc, 21);
+            ftpClient.Connect();
         }
 
         public void Dispose()

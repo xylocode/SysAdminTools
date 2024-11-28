@@ -82,7 +82,7 @@ namespace XyloCode.SysAdminTools
                 Type = "pem",
             };
             mikrotik.ExecuteNonQuery(exportVpnCert);
-            mikrotik.DownloadFile(exportVpnCert.FileName, localPath);
+            mikrotik.DownloadFile(exportVpnCert.FileName, localPath + @"\" + exportVpnCert.FileName);
 
             foreach (var user in users)
             {
@@ -138,7 +138,7 @@ namespace XyloCode.SysAdminTools
                 sb.AppendLine(passphrase);
                 File.AppendAllText(userPath + @"\" + addUserCert.Name + "_password.txt", sb.ToString());
 
-                mikrotik.DownloadFile(exportUserCert.FileName, userPath);
+                mikrotik.DownloadFile(exportUserCert.FileName, userPath + @"\" + exportUserCert.FileName);
             }
 
             ad.Dispose();

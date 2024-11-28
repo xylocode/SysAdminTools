@@ -6,7 +6,7 @@ using System.Text;
 using XyloCode.SysAdminTools.ActiveDirectory;
 using XyloCode.SysAdminTools.MikroTik;
 
-namespace SysAdminTools
+namespace XyloCode.SysAdminTools
 {
     internal class Program
     {
@@ -27,7 +27,7 @@ namespace SysAdminTools
             {
                 Directory.CreateDirectory(localPath);
             }
-            
+
 
             var users = ad.GetUsers(@"(&(objectclass=user)(MemberOf=CN=RadiusConnection1,CN=Users,DC=example,DC=ru))").ToList();
 
@@ -140,7 +140,7 @@ namespace SysAdminTools
 
                 mikrotik.DownloadFile(exportUserCert.FileName, userPath);
             }
-            
+
             ad.Dispose();
             mikrotik.Dispose();
         }

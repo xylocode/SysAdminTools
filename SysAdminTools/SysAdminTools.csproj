@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>XyloCode.SysAdminTools</RootNamespace>
+    <AssemblyName>XyloCode.SysAdminTools</AssemblyName>
+    <Title>XyloCode.SysAdminTools</Title>
+    <Version>1.0.0</Version>
+    <Description>A set of tools for generating custom VPN certificates based on data from ActiveDirectory.</Description>
+    <Authors>xylocode</Authors>
+    <Copyright>Copyright (c) 2024 Sergey Korobeynikov</Copyright>
+    <RepositoryUrl>https://github.com/xylocode/SysAdminTools</RepositoryUrl>
+    <PackageProjectUrl>https://xylocode.com/sys-admin-tools</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>Active Directory; AD; MikroTik; VPN; certificate; generator;</PackageTags>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentFTP" Version="51.1.0" />
+    <PackageReference Include="PasswordGenerator" Version="2.1.0" />
+    <PackageReference Include="System.DirectoryServices" Version="9.0.0" />
+    <PackageReference Include="tik4net" Version="3.5.0" />
+  </ItemGroup>
+
+</Project>

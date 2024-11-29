@@ -61,9 +61,9 @@ namespace XyloCode.SysAdminTools.MikroTik
             return result;
         }
 
-        public void DownloadFile(string fileName, string localPath)
+        public FtpStatus DownloadFile(string fileName, string localPath)
         {
-            ftpClient.DownloadFile(localPath, fileName);
+           return ftpClient.DownloadFile(localPath, fileName);
         }
     }
 }

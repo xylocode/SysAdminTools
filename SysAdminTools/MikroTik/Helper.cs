@@ -6,10 +6,10 @@ namespace XyloCode.SysAdminTools.MikroTik
 {
     public static class Helper
     {
-        public static void Parameterize<T>(this ITikCommand cmd, T obj)
-            where T : class
+        public static void Parameterize<TCommandModel>(this ITikCommand cmd, TCommandModel obj)
+            where TCommandModel : class
         {
-            var props = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            var props = typeof(TCommandModel).GetProperties(BindingFlags.Instance | BindingFlags.Public);
             foreach (var prop in props)
             {
                 var value = prop.GetValue(obj);

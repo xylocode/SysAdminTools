@@ -1,5 +1,6 @@
 ﻿using FluentFTP;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using tik4net;
@@ -43,6 +44,21 @@ namespace XyloCode.SysAdminTools.MikroTik
             var cmd = mikrotik.CreateCommand(cmdName);
             cmd.Parameterize(model);
             cmd.ExecuteNonQuery();
+        }
+
+        public IEnumerable<ITikReSentence> ExecuteListWithDuration<TCommandModel>(TCommandModel model, int durationSec = 60)
+            where TCommandModel : class
+        {
+            var cmdName = typeof(TCommandModel).GetCustomAttribute<MikroTikCommandAttribute>()?.Name;
+            if (string.IsNullOrWhiteSpace(cmdName))
+                throw new Exception("Не задана комманда!");
+
+            var cmd = mikrotik.CreateCommand(cmdName);
+            cmd.Parameterize(model);
+            var result = cmd.ExecuteListWithDuration(durationSec, out bool wasAborted, out string reason);
+            if (wasAborted)
+                throw new Exception(reason);
+            return result;
         }
 
         public void DownloadFile(string fileName, string localPath)

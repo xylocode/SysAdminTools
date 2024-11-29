@@ -12,15 +12,16 @@ namespace XyloCode.SysAdminTools
     {
         static void Main(string[] args)
         {
+            GenerateCertificates();
             Console.Beep();
             Console.ReadLine();
         }
 
         public static void GenerateCertificates()
         {
-            const string localPath = @"C:\data\vpn";
-            var ad = new ActiveDirectoryClient("ad.example.ru", "", "");
-            var mikrotik = new MikroTikClient("172.24.128.1", "apiUser", @"eM7<mA8+yM0<eB5@aT8%");
+            const string localPath = @"c:\data\vpn";
+            var ad = new ActiveDirectoryClient("ad.example.com", @"adUserName", @"adPassword");
+            var mikrotik = new MikroTikClient("192.168.88.1", "apiUserName", @"apiPassword");
             var passGen = new Password(true, true, true, false, 16);
 
             if (!Directory.Exists(localPath))
@@ -29,68 +30,70 @@ namespace XyloCode.SysAdminTools
             }
 
 
-            var users = ad.GetUsers(@"(&(objectclass=user)(MemberOf=CN=RadiusConnection1,CN=Users,DC=example,DC=ru))").ToList();
+            var users = ad.GetUsers(@"(&(objectclass=user)(MemberOf=CN=MyTargetGroupName,CN=Users,DC=example,DC=com))").ToList();
 
-            var prefix = $"ikev2_{DateTime.Now:yymmdd}_";
+            var prefix = $"ikev2_{DateTime.Now:yyMMdd}_";
             var addCaCert = new AddCertificateCmd
             {
                 Name = prefix + "CA",
                 Country = "RU",
-                State = "54",
-                Locality = "Novosibirsk",
-                Organization = "",
-                Unit = "",
-                CommonName = "vpn-ca.example.ru",
-                SubjectAltName = "DNS:vpn-ca.example.ru",
-                KeyUsage = "digital-signature,key-encipherment,data-encipherment,key-cert.-sign,crl-sign,tls-client,tls-server",
+                State = "RegionCode",
+                Locality = "CityName",
+                Organization = "OrganizationNumber",
+                Unit = "InnNumber",
+                CommonName = "vpn-ca.example.com",
+                SubjectAltName = "DNS:vpn-ca.example.com",
+                KeyUsage = "digital-signature,key-encipherment,data-encipherment,key-cert-sign,crl-sign,tls-client,tls-server",
             };
             mikrotik.ExecuteNonQuery(addCaCert);
 
             var signCaCert = new SignCertificateCmd
             {
-                Name = addCaCert.Name,
-                CaCrlHost = "vpn-crl.example.ru"
+                Number = addCaCert.Name,
+                CaCrlHost = "vpn-crl.example.com"
             };
-            mikrotik.ExecuteNonQuery(signCaCert);
+            mikrotik.ExecuteListWithDuration(signCaCert);
 
             var addVpnCert = new AddCertificateCmd
             {
                 Name = prefix + "VPN",
                 Country = "RU",
-                State = "54",
-                Locality = "Novosibirsk",
-                Organization = "",
-                Unit = "",
-                CommonName = "vpn.example.ru",
-                SubjectAltName = "DNS:vpn.example.ru",
+                State = "RegionCode",
+                Locality = "CityName",
+                Organization = "OrganizationNumber",
+                Unit = "InnNumber",
+                CommonName = "vpn.example.com",
+                SubjectAltName = "DNS:vpn.example.com",
                 KeyUsage = "ipsec-user,ipsec-tunnel,ipsec-end-system,tls-client,tls-server",
             };
             mikrotik.ExecuteNonQuery(addVpnCert);
 
             var signVpnCert = new SignCertificateCmd
             {
-                Name = addVpnCert.Name,
+                Number = addVpnCert.Name,
                 Ca = addCaCert.Name,
-                CaCrlHost = "vpn-crl.example.ru"
+                CaCrlHost = "vpn-crl.example.com"
             };
-            mikrotik.ExecuteNonQuery(signVpnCert);
+            mikrotik.ExecuteListWithDuration(signVpnCert);
 
-            var exportVpnCert = new ExportCertificateCmd
+            var exportCaCert = new ExportCertificateCmd
             {
-                Numbers = addVpnCert.Name,
-                FileName = addVpnCert.Name + ".crt",
+                Numbers = addCaCert.Name,
+                FileName = addCaCert.Name,
                 Type = "pem",
             };
-            mikrotik.ExecuteNonQuery(exportVpnCert);
-            mikrotik.DownloadFile(exportVpnCert.FileName, localPath + @"\" + exportVpnCert.FileName);
+            mikrotik.ExecuteNonQuery(exportCaCert);
+            mikrotik.DownloadFile(exportCaCert.FileName + ".crt", localPath + @"\" + exportCaCert.FileName + ".crt");
 
             foreach (var user in users)
             {
+                Console.WriteLine(user.Name);
                 var indexOf = user.UserPrincipalName.IndexOf("@");
                 var username = user
                     .UserPrincipalName[..indexOf]
                     .Replace(".", "")
-                    .Replace("_", "");
+                    .Replace("_", "")
+                    .Replace("-", "");
 
                 var passphrase = passGen.Next();
 
@@ -99,30 +102,30 @@ namespace XyloCode.SysAdminTools
                 {
                     Name = prefix + "user_" + username,
                     Country = "RU",
-                    State = "54",
-                    Locality = "Novosibirsk",
-                    Organization = "",
-                    Unit = "",
-                    CommonName = $"{username}.vpn.example.ru",
-                    SubjectAltName = $"DNS:{username}.vpn.example.ru",
+                    State = "RegionCode",
+                    Locality = "CityName",
+                    Organization = "OrganizationNumber",
+                    Unit = "InnNumber",
+                    CommonName = $"{username}.vpn.example.com",
+                    SubjectAltName = $"DNS:{username}.vpn.example.com",
                     KeyUsage = "ipsec-user,ipsec-tunnel,ipsec-end-system,tls-client",
                 };
-                mikrotik.ExecuteNonQuery(addCaCert);
+                mikrotik.ExecuteNonQuery(addUserCert);
 
                 var signUserCert = new SignCertificateCmd
                 {
-                    Name = addUserCert.Name,
+                    Number = addUserCert.Name,
                     Ca = addCaCert.Name,
-                    CaCrlHost = "vpn-crl.example.ru"
+                    CaCrlHost = "vpn-crl.example.com"
                 };
-                mikrotik.ExecuteNonQuery(signUserCert);
+                mikrotik.ExecuteListWithDuration(signUserCert);
 
                 var exportUserCert = new ExportCertificateCmd
                 {
                     Numbers = addUserCert.Name,
-                    FileName = addUserCert.Name + ".p12",
+                    FileName = addUserCert.Name,
                     ExportPassphrase = passphrase,
-                    Type = "PKCS12",
+                    Type = "pkcs12",
                 };
                 mikrotik.ExecuteNonQuery(exportUserCert);
 
@@ -132,13 +135,17 @@ namespace XyloCode.SysAdminTools
                 var sb = new StringBuilder();
                 sb.AppendLine(user.UserPrincipalName);
                 sb.AppendLine(user.Name);
-                sb.AppendLine(user.Email);
-                sb.AppendLine(user.Phone);
+
+                if (!string.IsNullOrWhiteSpace(user.Email))
+                    sb.AppendLine(user.Email);
+
+                if (!string.IsNullOrWhiteSpace(user.Phone))
+                    sb.AppendLine(user.Phone);
+
                 sb.AppendLine("=-=-=-=-=");
                 sb.AppendLine(passphrase);
                 File.AppendAllText(userPath + @"\" + addUserCert.Name + "_password.txt", sb.ToString());
-
-                mikrotik.DownloadFile(exportUserCert.FileName, userPath + @"\" + exportUserCert.FileName);
+                mikrotik.DownloadFile(exportUserCert.FileName + ".p12", userPath + @"\" + exportUserCert.FileName + ".p12");
             }
 
             ad.Dispose();

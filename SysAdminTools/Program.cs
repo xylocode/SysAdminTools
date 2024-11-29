@@ -88,7 +88,7 @@ namespace XyloCode.SysAdminTools
             foreach (var user in users)
             {
                 Console.WriteLine(user.Name);
-                var indexOf = user.UserPrincipalName.IndexOf("@");
+                var indexOf = user.UserPrincipalName.IndexOf('@');
                 var username = user
                     .UserPrincipalName[..indexOf]
                     .Replace(".", "")

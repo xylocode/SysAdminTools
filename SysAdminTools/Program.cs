@@ -132,7 +132,9 @@ namespace XyloCode.SysAdminTools
                 var userPath = localPath + @"\" + user.Name;
                 if (!Directory.Exists(userPath))
                     Directory.CreateDirectory(userPath);
+
                 var sb = new StringBuilder();
+                sb.AppendLine("<#");
                 sb.AppendLine(user.UserPrincipalName);
                 sb.AppendLine(user.Name);
 
@@ -142,9 +144,35 @@ namespace XyloCode.SysAdminTools
                 if (!string.IsNullOrWhiteSpace(user.Phone))
                     sb.AppendLine(user.Phone);
 
-                sb.AppendLine("=-=-=-=-=");
-                sb.AppendLine(passphrase);
-                File.AppendAllText(userPath + @"\" + addUserCert.Name + "_password.txt", sb.ToString());
+                sb.AppendLine("#>");
+                sb.AppendLine(@"
+$vpn_name = 'oldName';
+$exists_vpn = Get-VpnConnection -AllUserConnection
+foreach($vpn in $exists_vpn) {
+    if($vpn.Name -eq $vpn_name) {
+        Remove-VpnConnection -Name $vpn_name -AllUserConnection;
+    }
+}
+
+$exists_vpn = Get-VpnConnection
+foreach($vpn in $exists_vpn) {
+    if($vpn.Name -eq $vpn_name) {
+        Remove-VpnConnection -Name $vpn_name;
+    }
+}
+");
+
+                sb.AppendLine(@$"Import-Certificate -FilePath '{exportCaCert.FileName}.crt' -CertStoreLocation 'Cert:\LocalMachine\Root'");
+                sb.AppendLine(@$"Import-PfxCertificate -FilePath '{exportUserCert.FileName}.p12' -CertStoreLocation 'Cert:\LocalMachine\My' -Password '{passphrase}'");
+
+                sb.AppendLine(@"Add-VpnConnection -Name example_IKEv2VPN -ServerAddress vpn.example.com c -AuthenticationMethod MachineCertificate -DnsSuffix example.com -EncryptionLevel Maximum -TunnelType Ikev2 -SplitTunneling $True");
+                
+                sb.AppendLine(@"Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -ConnectionName SibGAP_IKEv2VPN -DHGroup Group14 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None");
+
+                File.AppendAllText(userPath + @"\sibgap_" + addUserCert.Name + ".ps1", sb.ToString());
+
+
+                mikrotik.DownloadFile(exportCaCert.FileName + ".crt", userPath + @"\" + exportCaCert.FileName + ".crt");
                 mikrotik.DownloadFile(exportUserCert.FileName + ".p12", userPath + @"\" + exportUserCert.FileName + ".p12");
             }
 

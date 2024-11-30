@@ -95,8 +95,13 @@ namespace XyloCode.SysAdminTools
                     .Replace("_", "")
                     .Replace("-", "");
 
-                var passphrase = passGen.Next();
 
+                var userPath = localPath + @"\" + user.Name;
+                if (!Directory.Exists(userPath))
+                    Directory.CreateDirectory(userPath);
+
+                var passphrase = passGen.Next();
+                
 
                 var addUserCert = new AddCertificateCmd
                 {
@@ -129,9 +134,11 @@ namespace XyloCode.SysAdminTools
                 };
                 mikrotik.ExecuteNonQuery(exportUserCert);
 
-                var userPath = localPath + @"\" + user.Name;
-                if (!Directory.Exists(userPath))
-                    Directory.CreateDirectory(userPath);
+                var guid = Guid.NewGuid().ToString();
+                var activator = SecureStringHelper2.Encrypt(passphrase, out string activatorKey);
+                File.AppendAllText($@"{localPath}\activator\{guid}.txt", activatorKey);
+                File.AppendAllText($@"{userPath}\{addUserCert.Name}.dat", activator);
+
 
                 var sb = new StringBuilder();
                 sb.AppendLine("<#");
@@ -144,9 +151,25 @@ namespace XyloCode.SysAdminTools
                 if (!string.IsNullOrWhiteSpace(user.Phone))
                     sb.AppendLine(user.Phone);
 
-                sb.AppendLine("#>");
+                sb.AppendLine(@"#>
+param([switch]$Elevated)
+
+function Test-Admin {
+    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+    $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+}
+
+if ((Test-Admin) -eq $false)  {
+    if ($elevated) {
+        # tried to elevate, did not work, aborting
+    } else {
+        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file ""{0}"" -elevated' -f ($myinvocation.MyCommand.Definition))
+    }
+    exit
+}");
                 sb.AppendLine(@"
-$vpn_name = 'oldName';
+# BEGIN
+$vpn_name = 'example_ikev2_vpn';
 $exists_vpn = Get-VpnConnection -AllUserConnection
 foreach($vpn in $exists_vpn) {
     if($vpn.Name -eq $vpn_name) {
@@ -161,15 +184,26 @@ foreach($vpn in $exists_vpn) {
     }
 }
 ");
-
-                sb.AppendLine(@$"Import-Certificate -FilePath '{exportCaCert.FileName}.crt' -CertStoreLocation 'Cert:\LocalMachine\Root'");
-                sb.AppendLine(@$"Import-PfxCertificate -FilePath '{exportUserCert.FileName}.p12' -CertStoreLocation 'Cert:\LocalMachine\My' -Password '{passphrase}'");
-
-                sb.AppendLine(@"Add-VpnConnection -Name example_IKEv2VPN -ServerAddress vpn.example.com c -AuthenticationMethod MachineCertificate -DnsSuffix example.com -EncryptionLevel Maximum -TunnelType Ikev2 -SplitTunneling $True");
                 
-                sb.AppendLine(@"Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -ConnectionName SibGAP_IKEv2VPN -DHGroup Group14 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None");
 
-                File.AppendAllText(userPath + @"\sibgap_" + addUserCert.Name + ".ps1", sb.ToString());
+                sb.AppendLine(@$"
+try {{
+$res = Invoke-WebRequest -Uri 'https://example.com/vpn/{guid}.txt';
+if($req.StatusCode -eq 200) {{
+        $set = ConvertTo-SecureString -String $res.Content -AsPlainText -Force;
+    }} else {{
+        $set = Read-Host -AsSecureString -Prompt 'Please enter the activation key for {guid}:';
+    }}
+}} catch {{
+    $set = Read-Host -AsSecureString -Prompt 'Please enter the activation key for {guid}:';
+}}
+$pwd = Get-Content '{exportUserCert.FileName}.dat' | ConvertTo-SecureString -SecureKey $set
+Import-Certificate -FilePath '{exportCaCert.FileName}.crt' -CertStoreLocation 'Cert:\LocalMachine\Root';
+Import-PfxCertificate -FilePath '{exportUserCert.FileName}.p12' -CertStoreLocation 'Cert:\LocalMachine\My' -Password $pwd;
+Add-VpnConnection -Name $vpn_name -ServerAddress vpn.example.com c -AuthenticationMethod MachineCertificate -DnsSuffix example.com -EncryptionLevel Maximum -TunnelType Ikev2 -SplitTunneling
+Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -ConnectionName $vpn_name -DHGroup Group14 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None");
+
+                File.AppendAllText(userPath + @"\example_" + addUserCert.Name + ".ps1", sb.ToString(), Encoding.Default);
 
 
                 mikrotik.DownloadFile(exportCaCert.FileName + ".crt", userPath + @"\" + exportCaCert.FileName + ".crt");

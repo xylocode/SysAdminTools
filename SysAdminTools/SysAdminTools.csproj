@@ -22,6 +22,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentFTP" Version="51.1.0" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.6" />
+    <PackageReference Include="Microsoft.PowerShell.Security" Version="7.4.6" />
     <PackageReference Include="PasswordGenerator" Version="2.1.0" />
     <PackageReference Include="System.DirectoryServices" Version="9.0.0" />
     <PackageReference Include="tik4net" Version="3.5.0" />

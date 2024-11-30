@@ -55,10 +55,7 @@ namespace XyloCode.SysAdminTools.MikroTik
 
             var cmd = mikrotik.CreateCommand(cmdName);
             cmd.Parameterize(model);
-            var result = cmd.ExecuteListWithDuration(durationSec, out bool wasAborted, out string reason);
-            if (wasAborted)
-                throw new Exception(reason);
-            return result;
+            return cmd.ExecuteListWithDuration(durationSec, out bool _, out string _);
         }
 
         public FtpStatus DownloadFile(string fileName, string localPath)

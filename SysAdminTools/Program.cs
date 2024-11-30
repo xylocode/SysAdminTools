@@ -197,11 +197,12 @@ if($req.StatusCode -eq 200) {{
 }} catch {{
     $set = Read-Host -AsSecureString -Prompt 'Please enter the activation key for {guid}:';
 }}
-$pwd = Get-Content '{exportUserCert.FileName}.dat' | ConvertTo-SecureString -SecureKey $set
+$pwd = Get-Content '{exportUserCert.FileName}.dat' | ConvertTo-SecureString -SecureKey $set;
 Import-Certificate -FilePath '{exportCaCert.FileName}.crt' -CertStoreLocation 'Cert:\LocalMachine\Root';
 Import-PfxCertificate -FilePath '{exportUserCert.FileName}.p12' -CertStoreLocation 'Cert:\LocalMachine\My' -Password $pwd;
-Add-VpnConnection -Name $vpn_name -ServerAddress vpn.example.com c -AuthenticationMethod MachineCertificate -DnsSuffix example.com -EncryptionLevel Maximum -TunnelType Ikev2 -SplitTunneling
-Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -ConnectionName $vpn_name -DHGroup Group14 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None");
+Add-VpnConnection -Name $vpn_name -ServerAddress vpn.example.com c -AuthenticationMethod MachineCertificate -DnsSuffix example.com -EncryptionLevel Maximum -TunnelType Ikev2 -SplitTunneling;
+Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -ConnectionName $vpn_name -DHGroup Group14 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None;
+");
 
                 File.AppendAllText(userPath + @"\example_" + addUserCert.Name + ".ps1", sb.ToString(), Encoding.Default);
 

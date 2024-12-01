@@ -26,14 +26,15 @@ namespace XyloCode.SysAdminTools
         public string Encrypt(string plainText,  out string key)
         {
             key = pwd.Next();
-            var res = ps.AddScript($@"
+            var script = ps.AddScript($@"
 $secureKey = ConvertTo-SecureString -String '{key}' -AsPlainText -Force;
 $secureText = ConvertTo-SecureString -String '{plainText}' -AsPlainText -Force;
 $result = ConvertFrom-SecureString -SecureString $secureText -SecureKey $secureKey;
 $result
-", true).Invoke();
+");
 
-            return res
+            return script
+                .Invoke()
                 .First()
                 .ToString();
         }

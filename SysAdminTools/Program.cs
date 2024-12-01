@@ -13,6 +13,7 @@ namespace XyloCode.SysAdminTools
         static void Main(string[] args)
         {
             GenerateCertificates();
+            Console.WriteLine("==---the end---==");
             Console.Beep();
             Console.ReadLine();
         }
@@ -22,6 +23,7 @@ namespace XyloCode.SysAdminTools
             const string localPath = @"c:\data\vpn";
             var ad = new ActiveDirectoryClient("ad.example.com", @"adUserName", @"adPassword");
             var mikrotik = new MikroTikClient("192.168.88.1", "apiUserName", @"apiPassword");
+            var ps2 = new PowerShell2();
             var passGen = new Password(true, true, true, false, 16);
 
             if (!Directory.Exists(localPath))
@@ -75,6 +77,13 @@ namespace XyloCode.SysAdminTools
                 CaCrlHost = "vpn-crl.example.com"
             };
             mikrotik.ExecuteListWithDuration(signVpnCert);
+
+            var ipsecIdentityCfg = new SetIPSecIdentityCmd
+            {
+                Numbers = "vpn",
+                Certificate = addVpnCert.Name
+            };
+            mikrotik.ExecuteNonQuery(ipsecIdentityCfg);
 
             var exportCaCert = new ExportCertificateCmd
             {
@@ -135,7 +144,7 @@ namespace XyloCode.SysAdminTools
                 mikrotik.ExecuteNonQuery(exportUserCert);
 
                 var guid = Guid.NewGuid().ToString();
-                var activator = SecureStringHelper2.Encrypt(passphrase, out string activatorKey);
+                var activator = ps2.Encrypt(passphrase, out string activatorKey);
                 File.AppendAllText($@"{localPath}\activator\{guid}.txt", activatorKey);
                 File.AppendAllText($@"{userPath}\{addUserCert.Name}.dat", activator);
 
@@ -188,7 +197,7 @@ foreach($vpn in $exists_vpn) {
 
                 sb.AppendLine(@$"
 try {{
-$res = Invoke-WebRequest -Uri 'https://example.com/vpn/{guid}.txt';
+$res = Invoke-WebRequest -Uri 'https://example.com/vpn/activator/{guid}.txt';
 if($req.StatusCode -eq 200) {{
         $set = ConvertTo-SecureString -String $res.Content -AsPlainText -Force;
     }} else {{
@@ -204,8 +213,9 @@ Add-VpnConnection -Name $vpn_name -ServerAddress vpn.example.com c -Authenticati
 Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -ConnectionName $vpn_name -DHGroup Group14 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None;
 ");
 
-                File.AppendAllText(userPath + @"\example_" + addUserCert.Name + ".ps1", sb.ToString(), Encoding.Default);
-
+                var scriptName = userPath + @"\example_" + addUserCert.Name + ".ps1";
+                File.AppendAllText(scriptName, sb.ToString(), Encoding.Default);
+                ps2.Ps2Exe(scriptName, false);
 
                 mikrotik.DownloadFile(exportCaCert.FileName + ".crt", userPath + @"\" + exportCaCert.FileName + ".crt");
                 mikrotik.DownloadFile(exportUserCert.FileName + ".p12", userPath + @"\" + exportUserCert.FileName + ".p12");

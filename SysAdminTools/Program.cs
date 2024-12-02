@@ -66,7 +66,7 @@ namespace XyloCode.SysAdminTools
                 Unit = "InnNumber",
                 CommonName = "vpn.example.com",
                 SubjectAltName = "DNS:vpn.example.com",
-                KeyUsage = "ipsec-user,ipsec-tunnel,ipsec-end-system,tls-client,tls-server",
+                KeyUsage = "ipsec-user,ipsec-tunnel,ipsec-end-system,tls-server",
             };
             mikrotik.ExecuteNonQuery(addVpnCert);
 

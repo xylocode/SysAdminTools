@@ -9,7 +9,7 @@
     <AssemblyName>XyloCode.SysAdminTools</AssemblyName>
     <Title>XyloCode.SysAdminTools</Title>
     <Version>1.0.0</Version>
-    <Description>A set of tools for generating custom VPN certificates based on data from ActiveDirectory.</Description>
+    <Description>A set of tools for generating custom VPN certificates on MikroTik routers based on data from ActiveDirectory.</Description>
     <Authors>xylocode</Authors>
     <Copyright>Copyright (c) 2024 Sergey Korobeynikov</Copyright>
     <RepositoryUrl>https://github.com/xylocode/SysAdminTools</RepositoryUrl>

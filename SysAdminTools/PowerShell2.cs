@@ -39,6 +39,10 @@ $result
                 .ToString();
         }
 
+        /// <summary>
+        /// Need
+        /// Install-Module ps2exe
+        /// </summary>
         public Collection<PSObject> Ps2Exe(string ps1File, bool deleteAfter = false)
         {
             var indexOf = ps1File.LastIndexOf(".ps1");

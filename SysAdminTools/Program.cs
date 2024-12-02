@@ -144,7 +144,7 @@ namespace XyloCode.SysAdminTools
                 };
                 mikrotik.ExecuteNonQuery(exportUserCert);
 
-                var guid = Guid.NewGuid().ToString();
+                var guid = Guid.NewGuid().ToString().ToUpper();
                 var activator = ps2.Encrypt(passphrase, out string activatorKey);
                 File.AppendAllText($@"{localPath}\activator\{guid}.txt", activatorKey);
                 File.AppendAllText($@"{userPath}\{addUserCert.Name}.dat", activator);
@@ -218,7 +218,7 @@ Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 
                 File.AppendAllText(scriptName, sb.ToString(), Encoding.Default);
                 ps2.Ps2Exe(scriptName, false);
 
-                mikrotik.DownloadFile(exportCaCert.FileName + ".crt", userPath + @"\" + exportCaCert.FileName + ".crt");
+                File.Copy(localPath + @"\" + exportCaCert.FileName + ".crt", userPath + @"\" + exportCaCert.FileName + ".crt");
                 mikrotik.DownloadFile(exportUserCert.FileName + ".p12", userPath + @"\" + exportUserCert.FileName + ".p12");
             }
 

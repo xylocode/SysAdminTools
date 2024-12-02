@@ -100,9 +100,10 @@ namespace XyloCode.SysAdminTools
                 var indexOf = user.UserPrincipalName.IndexOf('@');
                 var username = user
                     .UserPrincipalName[..indexOf]
-                    .Replace(".", "")
-                    .Replace("_", "")
-                    .Replace("-", "");
+                    //.Replace(".", "")
+                    //.Replace("_", "")
+                    //.Replace("-", "")
+                    ;
 
 
                 var userPath = localPath + @"\" + user.Name;
@@ -120,8 +121,8 @@ namespace XyloCode.SysAdminTools
                     Locality = "CityName",
                     Organization = "OrganizationNumber",
                     Unit = "InnNumber",
-                    CommonName = $"{username}.vpn.example.com",
-                    SubjectAltName = $"DNS:{username}.vpn.example.com",
+                    CommonName = $"{username}@vpn.example.com",
+                    SubjectAltName = $"Email:{username}@vpn.example.com",
                     KeyUsage = "ipsec-user,ipsec-tunnel,ipsec-end-system,tls-client",
                 };
                 mikrotik.ExecuteNonQuery(addUserCert);

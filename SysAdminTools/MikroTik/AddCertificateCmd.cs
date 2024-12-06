@@ -5,7 +5,7 @@
     {
         public string CommonName { get; set; }
         public string CopyFrom { get; set; }
-        public string Country { get; set; } = "RU";
+        public string Country { get; set; } = "SU";
         public string DaysValid { get; set; } = "825";
         public string DigestAlgorithm { get; set; }
         public string KeySize { get; set; } = "2048";

@@ -233,7 +233,7 @@ $ipsecParams = @{{
 }};
 
 Add-VpnConnection @vpnParams;
-Set-VpnConnectionIPsecConfiguration @ipsecParamss;
+Set-VpnConnectionIPsecConfiguration @ipsecParams;
 ");
 
                 var scriptName = userPath + @"\example_" + addUserCert.Name + ".ps1";

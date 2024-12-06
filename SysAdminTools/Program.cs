@@ -165,6 +165,8 @@ namespace XyloCode.SysAdminTools
 
 
                 sb.AppendLine(@"
+#Requires -RunAsAdministrator
+
 $vpn_name = 'example_ikev2_vpn';
 $exists_vpn = Get-VpnConnection -AllUserConnection
 foreach($vpn in $exists_vpn) {

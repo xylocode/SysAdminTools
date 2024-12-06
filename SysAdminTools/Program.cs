@@ -184,7 +184,7 @@ foreach($vpn in $exists_vpn) {
 
                 sb.AppendLine(@$"
 try {{
-$res = Invoke-WebRequest -Uri 'https://example.com/vpn/activator/{guid}.txt';
+$res = Invoke-WebRequest -Uri 'https://www.example.com/vpn/activator/{guid}.txt';
 if($req.StatusCode -le 299) {{
         $set = ConvertTo-SecureString -String $res.Content -AsPlainText -Force;
     }} else {{

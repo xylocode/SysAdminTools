@@ -196,7 +196,10 @@ if($req.StatusCode -le 299) {{
 $k = Get-Content '{exportUserCert.FileName}.dat' | ConvertTo-SecureString -SecureKey $set;
 $ca = Import-Certificate -FilePath '{exportCaCert.FileName}.crt' -CertStoreLocation 'Cert:\LocalMachine\Root';
 Import-PfxCertificate -FilePath '{exportUserCert.FileName}.p12' -CertStoreLocation 'Cert:\LocalMachine\My' -Password $k;
-Add-VpnConnection -Name $vpn_name -ServerAddress vpn.example.com -AuthenticationMethod MachineCertificate -MachineCertificateIssuerFilter $ca[0] -DnsSuffix example.com -EncryptionLevel Maximum -TunnelType Ikev2 -SplitTunneling;
+
+$eku = $null;
+# $eku = ('1.3.6.1.5.5.7.3.6', '1.3.6.1.5.5.7.3.7');
+Add-VpnConnection -Name $vpn_name -ServerAddress vpn.example.com -AuthenticationMethod MachineCertificate -MachineCertificateIssuerFilter $ca[0] -MachineCertificateEKUFilter $eku -DnsSuffix example.com -EncryptionLevel Maximum -TunnelType Ikev2 -SplitTunneling;
 Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -ConnectionName $vpn_name -DHGroup Group14 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None;
 ");
 

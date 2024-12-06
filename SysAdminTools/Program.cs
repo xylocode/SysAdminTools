@@ -160,25 +160,11 @@ namespace XyloCode.SysAdminTools
 
                 if (!string.IsNullOrWhiteSpace(user.Phone))
                     sb.AppendLine(user.Phone);
+                sb.AppendLine(@"#>");
 
-                sb.AppendLine(@"#>
-param([switch]$Elevated)
 
-function Test-Admin {
-    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
-    $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
-}
 
-if ((Test-Admin) -eq $false)  {
-    if ($elevated) {
-        # tried to elevate, did not work, aborting
-    } else {
-        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file ""{0}"" -elevated' -f ($myinvocation.MyCommand.Definition))
-    }
-    exit
-}");
                 sb.AppendLine(@"
-# BEGIN
 $vpn_name = 'example_ikev2_vpn';
 $exists_vpn = Get-VpnConnection -AllUserConnection
 foreach($vpn in $exists_vpn) {

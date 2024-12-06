@@ -194,13 +194,46 @@ if($req.StatusCode -le 299) {{
     $set = Read-Host -AsSecureString -Prompt 'Please enter the activation key for {guid}:';
 }}
 $k = Get-Content '{exportUserCert.FileName}.dat' | ConvertTo-SecureString -SecureKey $set;
-$ca = Import-Certificate -FilePath '{exportCaCert.FileName}.crt' -CertStoreLocation 'Cert:\LocalMachine\Root';
-Import-PfxCertificate -FilePath '{exportUserCert.FileName}.p12' -CertStoreLocation 'Cert:\LocalMachine\My' -Password $k;
 
-$eku = $null;
-# $eku = ('1.3.6.1.5.5.7.3.6', '1.3.6.1.5.5.7.3.7');
-Add-VpnConnection -Name $vpn_name -ServerAddress vpn.example.com -AuthenticationMethod MachineCertificate -MachineCertificateIssuerFilter $ca[0] -MachineCertificateEKUFilter $eku -DnsSuffix example.com -EncryptionLevel Maximum -TunnelType Ikev2 -SplitTunneling;
-Set-VpnConnectionIPsecConfiguration -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -ConnectionName $vpn_name -DHGroup Group14 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None;
+
+$caParams = @{{
+    FilePath = '{exportCaCert.FileName}.crt';
+    CertStoreLocation = 'Cert:\LocalMachine\Root';
+}};
+
+$pfxParams = @{{
+    FilePath = '{exportUserCert.FileName}.p12';
+    CertStoreLocation = 'Cert:\LocalMachine\My';
+    Password = $k;
+}};
+
+$ca = Import-Certificate @caParams;
+Import-PfxCertificate @pfxParams;
+
+$vpnParams = @{{
+    Name = $vpn_name;
+    ServerAddress = 'vpn.example.com';
+    AuthenticationMethod = 'MachineCertificate';
+    MachineCertificateIssuerFilter = $ca[0];
+    #MachineCertificateEKUFilter = ('1.3.6.1.5.5.7.3.6', '1.3.6.1.5.5.7.3.7');
+    DnsSuffix = 'example.com';
+    EncryptionLevel = 'Maximum';
+    TunnelType = 'Ikev2';
+    SplitTunneling = $true;
+}};
+
+$ipsecParams = @{{
+    AuthenticationTransformConstants = 'SHA256128';
+    CipherTransformConstants = 'AES256';
+    ConnectionName = $vpn_name;
+    DHGroup = 'Group14';
+    EncryptionMethod = 'AES256';
+    IntegrityCheckMethod = 'SHA256';
+    PfsGroup = 'None';
+}};
+
+Add-VpnConnection @vpnParams;
+Set-VpnConnectionIPsecConfiguration @ipsecParamss;
 ");
 
                 var scriptName = userPath + @"\example_" + addUserCert.Name + ".ps1";

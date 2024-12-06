@@ -234,6 +234,10 @@ $ipsecParams = @{{
 
 Add-VpnConnection @vpnParams;
 Set-VpnConnectionIPsecConfiguration @ipsecParams;
+
+[console]::Beep();
+[console]::WriteLine('Инсталляция завершена!');
+[console]::ReadLine();
 ");
 
                 var scriptName = userPath + @"\example_" + addUserCert.Name + ".ps1";

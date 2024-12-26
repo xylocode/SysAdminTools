@@ -23,9 +23,9 @@ namespace XyloCode.SysAdminTools
                 mtUser: "",
                 mtPass: "")
             {
-                Country = "SU",
-                State = "",
-                Locality = "",
+                Country = "RU",
+                State = "NVS",
+                Locality = "Novosibirsk",
                 Organization = "",
                 Unit = "",
 

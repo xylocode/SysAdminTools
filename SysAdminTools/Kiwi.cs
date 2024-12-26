@@ -231,27 +231,24 @@ namespace XyloCode.SysAdminTools
             if (!string.IsNullOrWhiteSpace(user.Phone))
                 sb.AppendLine(user.Phone);
 
-            sb.AppendLine(@"#>
+            sb.AppendLine(@$"#>
 #Requires -RunAsAdministrator
 
-$vpn_name = '" + VpnConnectionName + @"';
+$vpn_name = '{VpnConnectionName}';
 $exists_vpn = Get-VpnConnection -AllUserConnection
-foreach($vpn in $exists_vpn) {
-    if($vpn.Name -eq $vpn_name) {
+foreach($vpn in $exists_vpn) {{
+    if($vpn.Name -eq $vpn_name) {{
         Remove-VpnConnection -Name $vpn_name -AllUserConnection;
-    }
-}
+    }}
+}}
 
 $exists_vpn = Get-VpnConnection
-foreach($vpn in $exists_vpn) {
-    if($vpn.Name -eq $vpn_name) {
+foreach($vpn in $exists_vpn) {{
+    if($vpn.Name -eq $vpn_name) {{
         Remove-VpnConnection -Name $vpn_name;
-    }
-}
-");
+    }}
+}}
 
-
-            sb.AppendLine(@$"
 try {{
 $res = Invoke-WebRequest -Uri '{ActivatorWebSite}/{activatorGuid}.txt';
 if($req.StatusCode -le 299) {{

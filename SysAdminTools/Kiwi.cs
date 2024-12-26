@@ -184,7 +184,7 @@ namespace XyloCode.SysAdminTools
                 Organization = Organization,
                 Unit = Unit,
                 CommonName = $"{username}@{VpnSubdomain}.{Domain}",
-                SubjectAltName = $"Email:{username}@{VpnSubdomain}.{Domain}",
+                SubjectAltName = $"email:{username}@{VpnSubdomain}.{Domain}",
                 KeyUsage = "ipsec-user,ipsec-tunnel,ipsec-end-system,tls-client",
             };
             mikrotik.ExecuteNonQuery(addUserCert);

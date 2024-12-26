@@ -234,7 +234,7 @@ namespace XyloCode.SysAdminTools
             sb.AppendLine(@"#>
 #Requires -RunAsAdministrator
 
-$vpn_name = \'" + VpnConnectionName + @"\';
+$vpn_name = '" + VpnConnectionName + @"';
 $exists_vpn = Get-VpnConnection -AllUserConnection
 foreach($vpn in $exists_vpn) {
     if($vpn.Name -eq $vpn_name) {

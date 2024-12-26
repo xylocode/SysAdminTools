@@ -41,8 +41,8 @@ namespace XyloCode.SysAdminTools
 
 
 
-        public string CertCaName => Prefix + "_CA";
-        public string CertVpnName => Prefix + "_VPN";
+        public string CaCertName => Prefix + "_CA";
+        public string VpnCertName => Prefix + "_VPN";
 
 
 
@@ -90,12 +90,12 @@ namespace XyloCode.SysAdminTools
 
                 var passphrase = passGen.Next();
                 
-                var userCertName = CreateCertUser(username, passphrase);
-                mikrotik.DownloadFileToFolder($"{userCertName}.p12", userPath);
-                mikrotik.DownloadFileToFolder($"{CertVpnName}.crt", userPath);
+                var userCertFileName = CreateUserCert(username, passphrase);
+                mikrotik.DownloadFileToFolder($"{userCertFileName}.p12", userPath);
+                mikrotik.DownloadFileToFolder($"{VpnCertName}.crt", userPath);
 
-                var activatorGuid = CreateActivator(passphrase, username, userPath);
-                CreateScriptPS1(userPath, user, username, activatorGuid);
+                var activatorGuid = CreateActivator(passphrase, userCertFileName, userPath);
+                CreateScriptPS1(userPath, user, userCertFileName, activatorGuid);
                 CreateScriptCmd(userPath);
                 Console.WriteLine("Done!");
                 Console.WriteLine();
@@ -114,11 +114,11 @@ namespace XyloCode.SysAdminTools
             Users = ad.GetUsers(filter).ToList();
         }
 
-        public void CreateCertCA()
+        public void CreateCACert()
         {
             var addCaCert = new AddCertificateCmd
             {
-                Name = CertCaName,
+                Name = CaCertName,
                 Country = Country,
                 State = State,
                 Locality = Locality,
@@ -132,25 +132,25 @@ namespace XyloCode.SysAdminTools
 
             var signCaCert = new SignCertificateCmd
             {
-                Number = CertCaName,
+                Number = CaCertName,
                 CaCrlHost = CrlHost,
             };
             mikrotik.ExecuteListWithDuration(signCaCert);
 
             var exportCaCert = new ExportCertificateCmd
             {
-                Numbers = CertCaName,
-                FileName = CertCaName,
+                Numbers = CaCertName,
+                FileName = CaCertName,
                 Type = "pem",
             };
             mikrotik.ExecuteNonQuery(exportCaCert);
         }
 
-        public void CreateCertVPN()
+        public void CreateVPNCert()
         {
             var addVpnCert = new AddCertificateCmd
             {
-                Name = CertVpnName,
+                Name = VpnCertName,
                 Country = Country,
                 State = State,
                 Locality = Locality,
@@ -164,16 +164,16 @@ namespace XyloCode.SysAdminTools
 
             var signVpnCert = new SignCertificateCmd
             {
-                Number = CertVpnName,
-                Ca = CertCaName,
+                Number = VpnCertName,
+                Ca = CaCertName,
                 CaCrlHost = CrlHost,
             };
             mikrotik.ExecuteListWithDuration(signVpnCert);
         }
 
-        public string CreateCertUser(string username, string passphrase)
+        public string CreateUserCert(string username, string passphrase)
         {
-            string name = Prefix + "_user_" + username;
+            string name = $"{Prefix}_user_{username}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
 
             var addUserCert = new AddCertificateCmd
             {
@@ -192,7 +192,7 @@ namespace XyloCode.SysAdminTools
             var signUserCert = new SignCertificateCmd
             {
                 Number = name,
-                Ca = CertCaName,
+                Ca = CaCertName,
                 CaCrlHost = CrlHost,
             };
             mikrotik.ExecuteListWithDuration(signUserCert);
@@ -209,16 +209,16 @@ namespace XyloCode.SysAdminTools
             return name;
         }
 
-        public string CreateActivator(string passphrase, string username, string userPath)
+        public string CreateActivator(string passphrase, string userCertName, string userPath)
         {
             var guid = Guid.NewGuid().ToString().ToUpper();
             var activator = ps2.Encrypt(passphrase, out string activatorKey);
             File.AppendAllText($@"{ActivatorPath}\{guid}.txt", activatorKey);
-            File.AppendAllText($@"{userPath}\{Prefix}_user_{username}.dat", activator);
+            File.AppendAllText($@"{userPath}\{userCertName}.dat", activator);
             return guid;
         }
     
-        public void CreateScriptPS1(string userPath, ActiveDirectoryUser user, string username, string activatorGuid)
+        public void CreateScriptPS1(string userPath, ActiveDirectoryUser user, string userCertName, string activatorGuid)
         {
             var sb = new StringBuilder();
             sb.AppendLine("<#");
@@ -262,16 +262,16 @@ if($req.StatusCode -le 299) {{
 }} catch {{
     $set = Read-Host -AsSecureString -Prompt 'Please enter the activation key for {activatorGuid}:';
 }}
-$k = Get-Content '{Prefix}_user_{username}.dat' | ConvertTo-SecureString -SecureKey $set;
+$k = Get-Content '{userCertName}.dat' | ConvertTo-SecureString -SecureKey $set;
 
 
 $caParams = @{{
-    FilePath = '{CertCaName}.crt';
+    FilePath = '{CaCertName}.crt';
     CertStoreLocation = 'Cert:\LocalMachine\Root';
 }};
 
 $pfxParams = @{{
-    FilePath = '{Prefix}_user_{username}.p12';
+    FilePath = '{userCertName}.p12';
     CertStoreLocation = 'Cert:\LocalMachine\My';
     Password = $k;
 }};
@@ -312,7 +312,7 @@ Set-VpnConnectionIPsecConfiguration @ipsecParams;
             File.AppendAllText($@"{userPath}\install.ps1", sb.ToString(), Encoding.Default);
         }
 
-        public void CreateScriptCmd(string userPath)
+        public static void CreateScriptCmd(string userPath)
         {
             var cmd = $"powershell.exe -ExecutionPolicy RemoteSigned -NoLogo -File install.ps1";
             File.AppendAllText($@"{userPath}\install.cmd", cmd);

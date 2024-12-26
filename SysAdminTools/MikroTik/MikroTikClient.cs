@@ -60,7 +60,12 @@ namespace XyloCode.SysAdminTools.MikroTik
 
         public FtpStatus DownloadFile(string fileName, string localPath)
         {
-           return ftpClient.DownloadFile(localPath, fileName);
+            return ftpClient.DownloadFile(localPath, fileName);
+        }
+
+        public FtpStatus DownloadFileToFolder(string fileName, string localPath)
+        {
+            return ftpClient.DownloadFile($@"{localPath}\{fileName}", fileName);
         }
     }
 }

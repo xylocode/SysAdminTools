@@ -9,7 +9,7 @@ using XyloCode.SysAdminTools.MikroTik;
 
 namespace XyloCode.SysAdminTools
 {
-    internal class Kiwi
+    public class Kiwi
     {
         readonly ActiveDirectoryClient ad;
         readonly MikroTikClient mikrotik;

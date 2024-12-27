@@ -46,7 +46,7 @@ namespace XyloCode.SysAdminTools
 
 
 
-        public List<IUser> Users { get; set; }
+        public ICollection<IUser> Users { get; set; }
 
 
         public Kiwi(

@@ -2,7 +2,7 @@
 
 namespace XyloCode.SysAdminTools.ActiveDirectory
 {
-    public class ActiveDirectoryUser
+    public class ActiveDirectoryUser : IUser
     {
         readonly SearchResult item;
         public ActiveDirectoryUser(SearchResult item)

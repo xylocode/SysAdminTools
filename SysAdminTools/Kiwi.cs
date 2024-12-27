@@ -46,7 +46,7 @@ namespace XyloCode.SysAdminTools
 
 
 
-        public List<ActiveDirectoryUser> Users { get; set; }
+        public List<IUser> Users { get; set; }
 
 
         public Kiwi(
@@ -111,7 +111,7 @@ namespace XyloCode.SysAdminTools
 
         public void SetUsersFromAD(string filter)
         {
-            Users = ad.GetUsers(filter).ToList();
+            Users = ad.GetUsers(filter).ToList<IUser>();
         }
 
         public void CreateCACert()
@@ -218,7 +218,7 @@ namespace XyloCode.SysAdminTools
             return guid;
         }
     
-        public void CreateScriptPS1(string userPath, ActiveDirectoryUser user, string userCertName, string activatorGuid)
+        public void CreateScriptPS1(string userPath, IUser user, string userCertName, string activatorGuid)
         {
             var sb = new StringBuilder();
             sb.AppendLine("<#");

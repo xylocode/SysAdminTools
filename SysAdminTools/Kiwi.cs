@@ -90,12 +90,12 @@ namespace XyloCode.SysAdminTools
 
                 var passphrase = passGen.Next();
                 
-                var userCertFileName = CreateUserCert(username, passphrase);
-                mikrotik.DownloadFileToFolder($"{userCertFileName}.p12", userPath);
+                var userCertName = CreateUserCert(username, passphrase);
+                mikrotik.DownloadFileToFolder($"{userCertName}.p12", userPath);
                 mikrotik.DownloadFileToFolder($"{CaCertName}.crt", userPath);
 
-                var activatorGuid = CreateActivator(passphrase, userCertFileName, userPath);
-                CreateScriptPS1(userPath, user, userCertFileName, activatorGuid);
+                var activatorGuid = CreateActivator(passphrase, userCertName, userPath);
+                CreateScriptPS1(userPath, user, userCertName, activatorGuid);
                 CreateScriptCmd(userPath);
                 Console.WriteLine("Done!");
                 Console.WriteLine();

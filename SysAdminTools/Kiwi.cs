@@ -89,9 +89,9 @@ namespace XyloCode.SysAdminTools
                 if (!Directory.Exists(userPath))
                     Directory.CreateDirectory(userPath);
 
-                var passphrase = passGen.Next();
-                var userCertName = CreateUserCert(username, passphrase);
-                var activatorGuid = CreateActivator(passphrase, userCertName, userPath);
+                string passphrase = passGen.Next();
+                string userCertName = CreateUserCert(username, passphrase);
+                string activatorGuid = CreateActivator(passphrase, userCertName, userPath);
 
                 mikrotik.DownloadFileToFolder($"{userCertName}.p12", userPath);
                 mikrotik.DownloadFileToFolder($"{CaCertName}.crt", userPath);

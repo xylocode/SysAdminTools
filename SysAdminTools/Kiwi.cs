@@ -92,7 +92,7 @@ namespace XyloCode.SysAdminTools
                 
                 var userCertFileName = CreateUserCert(username, passphrase);
                 mikrotik.DownloadFileToFolder($"{userCertFileName}.p12", userPath);
-                mikrotik.DownloadFileToFolder($"{VpnCertName}.crt", userPath);
+                mikrotik.DownloadFileToFolder($"{CaCertName}.crt", userPath);
 
                 var activatorGuid = CreateActivator(passphrase, userCertFileName, userPath);
                 CreateScriptPS1(userPath, user, userCertFileName, activatorGuid);

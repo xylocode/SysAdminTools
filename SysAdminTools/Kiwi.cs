@@ -34,9 +34,10 @@ namespace XyloCode.SysAdminTools
 
 
         public required string Domain { get; init; }
+
+        public string CaSubdomain { get; init; } = "vpn-ca";
         public string VpnSubdomain { get; init; } = "vpn";
         public required string CrlHost { get; init; }
-        public string CaSubdomain { get; init; } = "vpn-ca";
      
 
 
@@ -89,14 +90,15 @@ namespace XyloCode.SysAdminTools
                     Directory.CreateDirectory(userPath);
 
                 var passphrase = passGen.Next();
-                
                 var userCertName = CreateUserCert(username, passphrase);
+                var activatorGuid = CreateActivator(passphrase, userCertName, userPath);
+
                 mikrotik.DownloadFileToFolder($"{userCertName}.p12", userPath);
                 mikrotik.DownloadFileToFolder($"{CaCertName}.crt", userPath);
 
-                var activatorGuid = CreateActivator(passphrase, userCertName, userPath);
                 CreateScriptPS1(userPath, user, userCertName, activatorGuid);
                 CreateScriptCmd(userPath);
+
                 Console.WriteLine("Done!");
                 Console.WriteLine();
 

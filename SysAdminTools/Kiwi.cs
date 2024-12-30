@@ -270,6 +270,7 @@ $caParams = @{{
 }};
 
 $pfxParams = @{{
+    Exportable = $false;
     FilePath = '{userCertName}.p12';
     CertStoreLocation = 'Cert:\LocalMachine\My';
     Password = $k;

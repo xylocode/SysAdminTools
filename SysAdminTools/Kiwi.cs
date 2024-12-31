@@ -315,7 +315,7 @@ Disable-NetAdapterBinding -Name $vpn_name -ComponentID 'ms_tcpip6';
 
         public static void CreateScriptCmd(string userPath)
         {
-            var cmd = $"powershell.exe  -NoLogo -ExecutionPolicy RemoteSigned -File install.ps1";
+            var cmd = $"powershell.exe -NoLogo -ExecutionPolicy RemoteSigned -File install.ps1";
             File.AppendAllText($@"{userPath}\install.cmd", cmd);
         }
     }

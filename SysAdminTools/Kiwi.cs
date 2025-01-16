@@ -303,7 +303,6 @@ $ipsecParams = @{{
 
 Add-VpnConnection @vpnParams;
 Set-VpnConnectionIPsecConfiguration @ipsecParams;
-Disable-NetAdapterBinding -Name $vpn_name -ComponentID 'ms_tcpip6';
 
 [console]::Beep();
 [console]::WriteLine('The end!');
